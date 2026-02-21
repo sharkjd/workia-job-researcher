@@ -60,6 +60,7 @@ async def main() -> None:
 
     company_domains = result.get("company_domains", [])
     career_urls = result.get("career_candidate_urls", [])
+    formatted_results = result.get("formatted_results", [])
 
     print("\n" + "=" * 50)
     print("NALEZENÉ FIRMY (domény z Exa)")
@@ -74,8 +75,14 @@ async def main() -> None:
         print(f"  {i}. {url}")
 
     print("\n" + "=" * 50)
-    print(f"Celkem: {len(company_domains)} firem, {len(career_urls)} odkazů")
-    print("Pro exclude domains uprav src/job_scout/blocked_domains.py")
+    print("VALIDOVANÉ POZICE (blue-collar)")
+    print("=" * 50)
+    for i, job in enumerate(formatted_results, 1):
+        print(f"  {i}. {job.get('position', '?')} @ {job.get('company', '?')}")
+
+    print("\n" + "=" * 50)
+    print(f"Celkem: {len(company_domains)} firem, {len(career_urls)} odkazů, {len(formatted_results)} pozic")
+    print("Výsledky exportovány do vysledky.csv")
     print("=" * 50)
 
 

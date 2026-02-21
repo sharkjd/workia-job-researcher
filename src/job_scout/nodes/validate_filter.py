@@ -54,7 +54,7 @@ async def validate_filter_node(state: JobScoutState) -> dict:
 
     import json
 
-    jobs_text = json.dumps(raw_jobs[:80], ensure_ascii=False, indent=2)
+    jobs_text = json.dumps(raw_jobs[:80], ensure_ascii=False, separators=(',', ':'))
 
     prompt = f"""{VALIDATE_PROMPT}
 
