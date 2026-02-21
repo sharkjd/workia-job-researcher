@@ -12,6 +12,7 @@ BLOCKED_DOMAINS: frozenset[str] = frozenset({
     "xn--prce-0va.cz",  # práce.cz (IDNA/punycode)
     "jobdnes.cz",
     "dobraprace.cz",
+    "pracezarohem.cz",
     "linkedin.com",
     "indeed.com",
     "glassdoor.com",

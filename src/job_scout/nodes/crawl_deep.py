@@ -31,7 +31,7 @@ async def crawl_deep_links_node(state: JobScoutState) -> dict:
         return {}
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
+        model="gemini-2.5-flash-lite",
         temperature=0.2,
     )
     structured_llm = llm.with_structured_output(PageAnalysisResult)
