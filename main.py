@@ -26,13 +26,17 @@ def get_user_input() -> dict:
     position = input("Pozice (např. řidič, skladník): ").strip() or "řidič"
     city = input("Město: ").strip() or "Praha"
     companies_per_run = _parse_int("Počet firem na běh (Exa výsledky) [10]: ", 10)
-    max_career_links = _parse_int("Max. odkazů na kariéru na firmu [5]: ", 5)
+    max_career_links = _parse_int("Max. odkazů na kariéru na firmu (Serper) [5]: ", 5)
+    max_nav_links_per_domain = _parse_int("Max. odkazů na crawl na doménu [5]: ", 5)
+    num_repetitions = _parse_int("Počet opakování smyčky [1]: ", 1)
 
     return {
         "position": position,
         "city": city,
         "companies_per_run": companies_per_run,
         "max_career_links": max_career_links,
+        "max_nav_links_per_domain": max_nav_links_per_domain,
+        "num_repetitions": num_repetitions,
     }
 
 
@@ -48,6 +52,8 @@ async def main() -> None:
         "user_input": user_input,
         "loop_count": 0,
         "dynamic_exclude_domains": [],
+        "excluded_urls": [],
+        "all_formatted_results": [],
         "company_domains": [],
         "career_candidate_urls": [],
         "discovered_nav_links": [],
@@ -60,7 +66,7 @@ async def main() -> None:
 
     company_domains = result.get("company_domains", [])
     career_urls = result.get("career_candidate_urls", [])
-    formatted_results = result.get("formatted_results", [])
+    all_formatted_results = result.get("all_formatted_results", [])
 
     print("\n" + "=" * 50)
     print("NALEZENÉ FIRMY (domény z Exa)")
@@ -77,11 +83,11 @@ async def main() -> None:
     print("\n" + "=" * 50)
     print("VALIDOVANÉ POZICE (blue-collar)")
     print("=" * 50)
-    for i, job in enumerate(formatted_results, 1):
+    for i, job in enumerate(all_formatted_results, 1):
         print(f"  {i}. {job.get('position', '?')} @ {job.get('company', '?')}")
 
     print("\n" + "=" * 50)
-    print(f"Celkem: {len(company_domains)} firem, {len(career_urls)} odkazů, {len(formatted_results)} pozic")
+    print(f"Celkem: {len(company_domains)} firem, {len(career_urls)} odkazů, {len(all_formatted_results)} pozic")
     print("Výsledky exportovány do vysledky.csv")
     print("=" * 50)
 

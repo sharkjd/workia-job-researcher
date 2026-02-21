@@ -9,6 +9,7 @@ from langchain_core.messages import HumanMessage
 from src.job_scout.blocked_domains import is_domain_blocked
 from src.job_scout.models import PageAnalysisResult
 from src.job_scout.state import JobScoutState
+from src.job_scout.url_utils import is_url_excluded, normalize_url
 
 CRAWL_DEEP_PROMPT = """Extrahuj ze stránky se seznamem pracovních pozic všechny nabízené pozice.
 
@@ -25,10 +26,18 @@ async def crawl_deep_links_node(state: JobScoutState) -> dict:
     """Crawl discovered nav links and extract job details."""
     from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 
-    nav_links = [u for u in state.get("discovered_nav_links", []) if not is_domain_blocked(u)]
+    discovered = state.get("discovered_nav_links", [])
+    excluded_urls = state.get("excluded_urls", [])
+    excluded_set = {normalize_url(u) for u in excluded_urls if u}
+    nav_links = [
+        u for u in discovered
+        if not is_domain_blocked(u) and not is_url_excluded(u, excluded_set)
+    ]
     if not nav_links:
         print("[crawl_deep_links] Žádné odkazy na seznamy pozic – přeskakuji")
         return {}
+
+    existing_jobs = state.get("raw_extracted_jobs", [])
 
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash-lite",
@@ -79,4 +88,4 @@ async def crawl_deep_links_node(state: JobScoutState) -> dict:
                 continue
 
     print(f"[crawl_deep_links] Z hlubokých odkazů extrahováno {len(raw_jobs)} pozic")
-    return {"raw_extracted_jobs": raw_jobs}
+    return {"raw_extracted_jobs": existing_jobs + raw_jobs}

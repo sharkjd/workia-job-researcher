@@ -37,6 +37,15 @@ class ValidatedJob(BaseModel):
     source_url: str = Field(description="URL of the page where job was found")
 
 
+class FilteredUrlsResult(BaseModel):
+    """Výsledek LLM filtrování URL – pouze ty, které mohou obsahovat volné pozice."""
+
+    urls: list[str] = Field(
+        default_factory=list,
+        description="URL, které pravděpodobně vedou na stránky se seznamem pracovních pozic",
+    )
+
+
 class ValidatedJobsList(BaseModel):
     """Wrapper for list of validated jobs (for LLM structured output)."""
 

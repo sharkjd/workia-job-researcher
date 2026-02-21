@@ -7,6 +7,7 @@ import httpx
 
 from src.job_scout.blocked_domains import is_domain_blocked
 from src.job_scout.state import JobScoutState
+from src.job_scout.url_utils import is_url_excluded, normalize_url
 
 SERPER_URL = "https://google.serper.dev/search"
 
@@ -39,6 +40,8 @@ async def find_career_pages_node(state: JobScoutState) -> dict:
     company_domains = state.get("company_domains", [])
     user_input = state.get("user_input", {})
     max_career_links = user_input.get("max_career_links", 5)
+    excluded_urls = state.get("excluded_urls", [])
+    excluded_set = {normalize_url(u) for u in excluded_urls if u}
 
     career_candidate_urls: list[str] = []
 
@@ -48,12 +51,17 @@ async def find_career_pages_node(state: JobScoutState) -> dict:
             urls = await _serper_search(query, api_key)
             urls = urls[:max_career_links]
             if urls:
-                career_candidate_urls.extend(urls)
+                filtered = [u for u in urls if not is_url_excluded(u, excluded_set)]
+                career_candidate_urls.extend(filtered)
             else:
-                career_candidate_urls.append(f"https://{domain}")
+                fallback = f"https://{domain}"
+                if not is_url_excluded(fallback, excluded_set):
+                    career_candidate_urls.append(fallback)
             await asyncio.sleep(1)
         except Exception:
-            career_candidate_urls.append(f"https://{domain}")
+            fallback = f"https://{domain}"
+            if not is_url_excluded(fallback, excluded_set):
+                career_candidate_urls.append(fallback)
 
     career_candidate_urls = [u for u in career_candidate_urls if not is_domain_blocked(u)]
     print(f"[find_career_pages] Nalezeno {len(career_candidate_urls)} kariérních stránek")

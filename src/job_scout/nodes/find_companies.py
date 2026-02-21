@@ -67,4 +67,6 @@ async def find_companies_node(state: JobScoutState) -> dict:
         "dynamic_exclude_domains": new_exclude,
         "career_candidate_urls": [],
         "discovered_nav_links": [],
+        "raw_extracted_jobs": [],
+        "formatted_results": [],
     }

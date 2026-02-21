@@ -8,7 +8,9 @@ from langchain_core.messages import HumanMessage
 
 from src.job_scout.blocked_domains import is_domain_blocked
 from src.job_scout.models import PageAnalysisResult
+from src.job_scout.nav_link_filter import filter_career_candidates, limit_per_domain
 from src.job_scout.state import JobScoutState
+from src.job_scout.url_utils import is_url_excluded, normalize_url
 
 ANALYZE_PROMPT = """Analyzuj tuto webovou stránku a extrahuj:
 
@@ -29,7 +31,13 @@ async def analyze_initial_pages_node(state: JobScoutState) -> dict:
     """Crawl career candidate URLs and extract jobs + nav links via LLM."""
     from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 
-    urls = [u for u in state.get("career_candidate_urls", []) if not is_domain_blocked(u)]
+    career_urls = state.get("career_candidate_urls", [])
+    excluded_urls = state.get("excluded_urls", [])
+    excluded_set = {normalize_url(u) for u in excluded_urls if u}
+    urls = [
+        u for u in career_urls
+        if not is_domain_blocked(u) and not is_url_excluded(u, excluded_set)
+    ]
     if not urls:
         print("[analyze_initial_pages] Žádné kariérní stránky k analýze")
         return {"raw_extracted_jobs": [], "discovered_nav_links": []}
@@ -88,7 +96,15 @@ async def analyze_initial_pages_node(state: JobScoutState) -> dict:
             except Exception:
                 continue
 
-    print(f"[analyze_initial_pages] Extrahováno {len(raw_jobs)} pozic, {len(nav_links)} odkazů na seznamy")
+    # Filtrovat a limitovat před vrácením – vyřadit produkty, e-shop, novinky atd.
+    max_per_domain = state.get("user_input", {}).get("max_nav_links_per_domain", 5)
+    nav_links = filter_career_candidates(nav_links)
+    nav_links = limit_per_domain(nav_links, max_per_domain)
+
+    print(
+        f"[analyze_initial_pages] Extrahováno {len(raw_jobs)} pozic, "
+        f"{len(nav_links)} odkazů na seznamy (po filtru)"
+    )
     return {
         "raw_extracted_jobs": raw_jobs,
         "discovered_nav_links": nav_links,

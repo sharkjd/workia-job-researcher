@@ -42,9 +42,14 @@ async def validate_filter_node(state: JobScoutState) -> dict:
 
     if not raw_jobs:
         print(f"[validate_filter] Žádné pozice k validaci (loop {loop_count + 1})")
+        career_urls = state.get("career_candidate_urls", [])
+        nav_links = state.get("discovered_nav_links", [])
+        urls_to_exclude = list(career_urls) + list(nav_links)
         return {
             "formatted_results": [],
             "loop_count": loop_count + 1,
+            "excluded_urls": urls_to_exclude,
+            "all_formatted_results": [],
         }
 
     llm = ChatGoogleGenerativeAI(
@@ -85,7 +90,13 @@ Extrahované pozice (JSON):
             seen.add(key)
             unique.append(v.model_dump())
 
+    career_urls = state.get("career_candidate_urls", [])
+    nav_links = state.get("discovered_nav_links", [])
+    urls_to_exclude = list(career_urls) + list(nav_links)
+
     return {
         "formatted_results": unique,
         "loop_count": loop_count + 1,
+        "excluded_urls": urls_to_exclude,
+        "all_formatted_results": unique,
     }
