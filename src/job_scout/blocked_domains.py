@@ -13,6 +13,8 @@ BLOCKED_DOMAINS: frozenset[str] = frozenset({
     "jobdnes.cz",
     "dobraprace.cz",
     "pracezarohem.cz",
+    "grafton.cz",
+    "novinator.cz",
     "linkedin.com",
     "indeed.com",
     "glassdoor.com",
@@ -39,6 +41,7 @@ BLOCKED_DOMAINS: frozenset[str] = frozenset({
     "slu.cz",
     "is.muni.cz",
     # Ostatní
+    "rejstrik-firem.kurzy.cz",
     "floowie.com",
     "svn.apache.org",
 })
