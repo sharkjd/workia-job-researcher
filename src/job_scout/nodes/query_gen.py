@@ -5,8 +5,10 @@ from src.job_scout.state import JobScoutState
 
 QUERY_GEN_PROMPT = """Vygeneruj sémantický vyhledávací dotaz pro Exa.ai, který najde webové stránky firem v městě {city}, které zaměstnávají pozici {position}.
 
+Hledáme výhradně weby konkrétních firem (např. firma.cz, dopravni-spolecnost.cz), ne portály pro hledání práce jako jobs.cz, Prace.cz, Indeed, LinkedIn Jobs apod.
+
 Zaměř se na obchodní entity jako: logistické areály, výrobní závody, dopravní společnosti, sklady, distribuce.
-NEVYHLEDÁVEJ job boardy ani portály s inzeráty.
+NEVYHLEDÁVEJ job boardy ani agregátory inzerátů.
 
 Vrať POUZE samotný vyhledávací dotaz, žádný další text."""
 
