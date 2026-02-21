@@ -34,5 +34,10 @@ async def exa_query_gen_node(state: JobScoutState) -> dict:
     )
 
     query = response.content.strip().strip('"').strip("'")
-    print(f"[exa_query_gen] Vygenerován dotaz: {query[:60]}{'...' if len(query) > 60 else ''}")
+
+    print("\n" + "=" * 50)
+    print("PROMPT PRO EXA.AI")
+    print("=" * 50)
+    print(query)
+
     return {"exa_query": query}

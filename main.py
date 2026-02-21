@@ -55,6 +55,7 @@ async def main() -> None:
         "excluded_urls": [],
         "all_formatted_results": [],
         "company_domains": [],
+        "company_metadata": [],
         "career_candidate_urls": [],
         "discovered_nav_links": [],
         "raw_extracted_jobs": [],
@@ -64,32 +65,24 @@ async def main() -> None:
     graph = compile_graph()
     result = await graph.ainvoke(initial_state)
 
-    company_domains = result.get("company_domains", [])
-    career_urls = result.get("career_candidate_urls", [])
-    all_formatted_results = result.get("all_formatted_results", [])
+    all_formatted = result.get("all_formatted_results", [])
 
-    print("\n" + "=" * 50)
-    print("NALEZENÉ FIRMY (domény z Exa)")
-    print("=" * 50)
-    for i, domain in enumerate(company_domains, 1):
-        print(f"  {i}. {domain}")
-
-    print("\n" + "=" * 50)
-    print("KARIÉRNÍ ODKAZY (URL z Serper)")
-    print("=" * 50)
-    for i, url in enumerate(career_urls, 1):
-        print(f"  {i}. {url}")
-
-    print("\n" + "=" * 50)
-    print("VALIDOVANÉ POZICE (blue-collar)")
-    print("=" * 50)
-    for i, job in enumerate(all_formatted_results, 1):
-        print(f"  {i}. {job.get('position', '?')} @ {job.get('company', '?')}")
-
-    print("\n" + "=" * 50)
-    print(f"Celkem: {len(company_domains)} firem, {len(career_urls)} odkazů, {len(all_formatted_results)} pozic")
-    print("Výsledky exportovány do vysledky.csv")
-    print("=" * 50)
+    print("\n" + "=" * 60)
+    print("VÝSLEDKY – Blue-collar pozice")
+    print("=" * 60)
+    if all_formatted:
+        for i, job in enumerate(all_formatted, 1):
+            pos = job.get("position", "")
+            company = job.get("company", "")
+            salary = job.get("salary") or "neuvedeno"
+            url = job.get("url", "")
+            print(f"\n  {i}. {pos} @ {company}")
+            print(f"     Plat: {salary}")
+            print(f"     URL: {url}")
+        print(f"\nCelkem: {len(all_formatted)} pozic")
+        print("Export do vysledky.csv proběhl.")
+    else:
+        print("  Žádné blue-collar pozice nenalezeny.")
 
 
 if __name__ == "__main__":

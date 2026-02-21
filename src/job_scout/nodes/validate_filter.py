@@ -24,6 +24,10 @@ ODSTRANIT:
 - Pozice vyžadující VŠ vzdělání
 - Administrativa, účetnictví
 
+ZDROJ INZERÁTU:
+- Pokud je zdrojem (source_url) firemní systém (Teamio, Recruitis, Greenhouse) a pozice splňuje blue-collar kritéria, PONECHEJ JI.
+- Pokud je zdrojem obecný portál (Bazoš, Annonce) a inzerát nemá jasnou identifikaci firmy, ODSTRAŇ JEJ.
+
 Deduplikuj podle kombinace Title + Company - každou unikátní pozici uveď jen jednou.
 
 Vrať POUZE pozice, které PONECHAT."""
@@ -89,6 +93,8 @@ Extrahované pozice (JSON):
         if key not in seen:
             seen.add(key)
             unique.append(v.model_dump())
+
+    print(f"[validate_filter] raw_jobs: {len(raw_jobs)}, unique po validaci: {len(unique)}")
 
     career_urls = state.get("career_candidate_urls", [])
     nav_links = state.get("discovered_nav_links", [])

@@ -76,9 +76,6 @@ def is_likely_non_career(url: str) -> bool:
         parsed = urlparse(url)
         path = parsed.path or ""
         path_lower = path.lower().rstrip("/") or "/"
-        # Hlavní doména bez podstránky – vždy propustit (některé weby mají kariéru na homepage)
-        if path_lower in ("/", ""):
-            return False
         # Rozšíření souborů
         if any(path_lower.endswith(ext) for ext in NON_CAREER_EXTENSIONS):
             return True

@@ -42,14 +42,16 @@ async def find_companies_node(state: JobScoutState) -> dict:
     exa = Exa(api_key=api_key)
 
     # Exa: excludeDomains not supported with category="company", use general search
+    # contents s textem pro snippety pro company_triage
     response = exa.search(
         query=query,
         num_results=companies_per_run,
         exclude_domains=dynamic_exclude if dynamic_exclude else None,
         type="auto",
-        contents=False,
+        contents={"text": {"maxCharacters": 400}},
     )
 
+    company_metadata: list[dict] = []
     seen = set(dynamic_exclude)
     for result in response.results:
         url = getattr(result, "url", None) or getattr(result, "id", "")
@@ -59,11 +61,35 @@ async def find_companies_node(state: JobScoutState) -> dict:
             company_domains.append(domain)
             new_exclude.append(domain)
 
+            # Snippet z textu nebo highlights
+            snippet = ""
+            text = getattr(result, "text", None)
+            if text:
+                snippet = (text[:400] + "...") if len(text) > 400 else text
+            else:
+                highlights = getattr(result, "highlights", None) or []
+                if highlights:
+                    snippet = " ".join(str(h) for h in highlights[:3])[:400]
+            title = getattr(result, "title", None) or ""
+
+            company_metadata.append({
+                "domain": domain,
+                "snippet": snippet,
+                "title": title,
+            })
+
     await asyncio.sleep(1)
 
-    print(f"[find_companies] Nalezeno {len(company_domains)} firem")
+    print("\n" + "=" * 50)
+    print("SEZNAM DOMÉN Z EXA.AI")
+    print("=" * 50)
+    for i, d in enumerate(company_domains, 1):
+        print(f"  {i}. {d}")
+
     return {
         "company_domains": company_domains,
+        "company_metadata": company_metadata,
+        "exa_raw_domains": company_domains,
         "dynamic_exclude_domains": new_exclude,
         "career_candidate_urls": [],
         "discovered_nav_links": [],

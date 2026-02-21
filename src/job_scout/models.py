@@ -50,3 +50,12 @@ class ValidatedJobsList(BaseModel):
     """Wrapper for list of validated jobs (for LLM structured output)."""
 
     jobs: list[ValidatedJob] = Field(default_factory=list)
+
+
+class TriageResult(BaseModel):
+    """Výsledek LLM triage – ověřené firemní domény."""
+
+    verified_domains: list[str] = Field(
+        default_factory=list,
+        description="Seznam domén, které jsou skutečné firmy (ne agregátory)",
+    )

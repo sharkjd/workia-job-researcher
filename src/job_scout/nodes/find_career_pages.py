@@ -43,26 +43,41 @@ async def find_career_pages_node(state: JobScoutState) -> dict:
     excluded_urls = state.get("excluded_urls", [])
     excluded_set = {normalize_url(u) for u in excluded_urls if u}
 
-    career_candidate_urls: list[str] = []
+    serper_raw_urls: list[str] = []
 
     for domain in company_domains:
-        query = f'site:{domain} (kariéra OR práce OR "volná místa" OR jobs)'
+        query = f'site:{domain} (kariéra OR práce OR volná místa OR jobs)'
         try:
             urls = await _serper_search(query, api_key)
             urls = urls[:max_career_links]
             if urls:
                 filtered = [u for u in urls if not is_url_excluded(u, excluded_set)]
-                career_candidate_urls.extend(filtered)
+                serper_raw_urls.extend(filtered)
             else:
                 fallback = f"https://{domain}"
                 if not is_url_excluded(fallback, excluded_set):
-                    career_candidate_urls.append(fallback)
+                    serper_raw_urls.append(fallback)
             await asyncio.sleep(1)
         except Exception:
             fallback = f"https://{domain}"
             if not is_url_excluded(fallback, excluded_set):
-                career_candidate_urls.append(fallback)
+                serper_raw_urls.append(fallback)
 
-    career_candidate_urls = [u for u in career_candidate_urls if not is_domain_blocked(u)]
-    print(f"[find_career_pages] Nalezeno {len(career_candidate_urls)} kariérních stránek")
-    return {"career_candidate_urls": career_candidate_urls}
+    career_candidate_urls = [u for u in serper_raw_urls if not is_domain_blocked(u)]
+
+    print("\n" + "=" * 50)
+    print("SEZNAM URL PO SERPER")
+    print("=" * 50)
+    for i, u in enumerate(serper_raw_urls, 1):
+        print(f"  {i}. {u}")
+
+    print("\n" + "=" * 50)
+    print("SEZNAM URL ZE SERPERU (před LLM filtrem)")
+    print("=" * 50)
+    for i, u in enumerate(career_candidate_urls, 1):
+        print(f"  {i}. {u}")
+
+    return {
+        "career_candidate_urls": career_candidate_urls,
+        "serper_raw_urls": serper_raw_urls,
+    }
