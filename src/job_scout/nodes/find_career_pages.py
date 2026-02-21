@@ -4,6 +4,8 @@ import asyncio
 import os
 
 import httpx
+
+from src.job_scout.blocked_domains import is_domain_blocked
 from src.job_scout.state import JobScoutState
 
 SERPER_URL = "https://google.serper.dev/search"
@@ -53,4 +55,6 @@ async def find_career_pages_node(state: JobScoutState) -> dict:
         except Exception:
             career_candidate_urls.append(f"https://{domain}")
 
+    career_candidate_urls = [u for u in career_candidate_urls if not is_domain_blocked(u)]
+    print(f"[find_career_pages] Nalezeno {len(career_candidate_urls)} kariérních stránek")
     return {"career_candidate_urls": career_candidate_urls}

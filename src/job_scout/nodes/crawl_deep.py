@@ -6,6 +6,7 @@ from urllib.parse import urljoin, urlparse
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 
+from src.job_scout.blocked_domains import is_domain_blocked
 from src.job_scout.models import PageAnalysisResult
 from src.job_scout.state import JobScoutState
 
@@ -24,8 +25,9 @@ async def crawl_deep_links_node(state: JobScoutState) -> dict:
     """Crawl discovered nav links and extract job details."""
     from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 
-    nav_links = state.get("discovered_nav_links", [])
+    nav_links = [u for u in state.get("discovered_nav_links", []) if not is_domain_blocked(u)]
     if not nav_links:
+        print("[crawl_deep_links] Žádné odkazy na seznamy pozic – přeskakuji")
         return {}
 
     llm = ChatGoogleGenerativeAI(
@@ -76,4 +78,5 @@ async def crawl_deep_links_node(state: JobScoutState) -> dict:
             except Exception:
                 continue
 
+    print(f"[crawl_deep_links] Z hlubokých odkazů extrahováno {len(raw_jobs)} pozic")
     return {"raw_extracted_jobs": raw_jobs}

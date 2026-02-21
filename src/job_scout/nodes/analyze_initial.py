@@ -6,6 +6,7 @@ from urllib.parse import urljoin, urlparse
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 
+from src.job_scout.blocked_domains import is_domain_blocked
 from src.job_scout.models import PageAnalysisResult
 from src.job_scout.state import JobScoutState
 
@@ -28,8 +29,9 @@ async def analyze_initial_pages_node(state: JobScoutState) -> dict:
     """Crawl career candidate URLs and extract jobs + nav links via LLM."""
     from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 
-    urls = state.get("career_candidate_urls", [])
+    urls = [u for u in state.get("career_candidate_urls", []) if not is_domain_blocked(u)]
     if not urls:
+        print("[analyze_initial_pages] Žádné kariérní stránky k analýze")
         return {"raw_extracted_jobs": [], "discovered_nav_links": []}
 
     llm = ChatGoogleGenerativeAI(
@@ -79,14 +81,14 @@ async def analyze_initial_pages_node(state: JobScoutState) -> dict:
                     raw_jobs.append(job_dict)
 
                 for link in analysis.navigation_links:
-                    if link and link.startswith("http"):
-                        nav_links.append(link)
-                    elif link:
-                        nav_links.append(urljoin(base_url, link))
+                    full_url = urljoin(base_url, link) if link and not link.startswith("http") else link
+                    if full_url and not is_domain_blocked(full_url):
+                        nav_links.append(full_url)
 
             except Exception:
                 continue
 
+    print(f"[analyze_initial_pages] Extrahováno {len(raw_jobs)} pozic, {len(nav_links)} odkazů na seznamy")
     return {
         "raw_extracted_jobs": raw_jobs,
         "discovered_nav_links": nav_links,

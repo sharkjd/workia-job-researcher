@@ -4,6 +4,7 @@ import asyncio
 import os
 from urllib.parse import urlparse
 
+from src.job_scout.blocked_domains import is_domain_blocked
 from src.job_scout.state import JobScoutState
 
 
@@ -53,13 +54,14 @@ async def find_companies_node(state: JobScoutState) -> dict:
     for result in response.results:
         url = getattr(result, "url", None) or getattr(result, "id", "")
         domain = _extract_domain(url)
-        if domain and domain not in seen:
+        if domain and domain not in seen and not is_domain_blocked(domain):
             seen.add(domain)
             company_domains.append(domain)
             new_exclude.append(domain)
 
     await asyncio.sleep(1)
 
+    print(f"[find_companies] Nalezeno {len(company_domains)} firem")
     return {
         "company_domains": company_domains,
         "dynamic_exclude_domains": new_exclude,

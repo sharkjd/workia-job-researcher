@@ -1,5 +1,6 @@
 """Validate and filter jobs - Blue-Collar Bouncer."""
 
+from src.job_scout.blocked_domains import is_domain_blocked
 from src.job_scout.models import ValidatedJob, ValidatedJobsList
 from src.job_scout.state import JobScoutState
 
@@ -33,10 +34,14 @@ async def validate_filter_node(state: JobScoutState) -> dict:
     from langchain_google_genai import ChatGoogleGenerativeAI
     from langchain_core.messages import HumanMessage
 
-    raw_jobs = state.get("raw_extracted_jobs", [])
+    raw_jobs = [
+        j for j in state.get("raw_extracted_jobs", [])
+        if not is_domain_blocked(j.get("url", "")) and not is_domain_blocked(j.get("source_url", ""))
+    ]
     loop_count = state.get("loop_count", 0)
 
     if not raw_jobs:
+        print(f"[validate_filter] Žádné pozice k validaci (loop {loop_count + 1})")
         return {
             "formatted_results": [],
             "loop_count": loop_count + 1,
@@ -73,6 +78,8 @@ Extrahované pozice (JSON):
     seen = set()
     unique: list[dict] = []
     for v in validated:
+        if is_domain_blocked(v.url) or is_domain_blocked(v.source_url):
+            continue
         key = (v.position.lower().strip(), v.company.lower().strip())
         if key not in seen:
             seen.add(key)

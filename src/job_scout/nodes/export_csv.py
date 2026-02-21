@@ -23,4 +23,5 @@ async def export_csv_node(state: JobScoutState) -> dict:
         for row in results:
             writer.writerow({k: (v or "") for k, v in row.items() if k in FIELDNAMES})
 
+    print(f"[export_csv] Exportováno {len(results)} pozic do {CSV_PATH}")
     return {}
