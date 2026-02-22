@@ -70,6 +70,21 @@ async def main() -> None:
     print("\n" + "=" * 60)
     print("VÝSLEDKY – Blue-collar pozice")
     print("=" * 60)
+
+    # Souhrn
+    user_input = result.get("user_input", {})
+    position_req = user_input.get("position", "—")
+    city_req = user_input.get("city", "—")
+    unique_companies = len(
+        {(j.get("company") or "").strip() for j in all_formatted if (j.get("company") or "").strip()}
+    )
+    num_positions = len(all_formatted)
+
+    print(f"ZADÁNÍ:  pozice „{position_req}“, město {city_req}")
+    print(f"FIRMY:   {unique_companies} unikátních")
+    print(f"POZICE:  {num_positions} celkem")
+    print("-" * 60)
+
     if all_formatted:
         for i, job in enumerate(all_formatted, 1):
             pos = job.get("position", "")
