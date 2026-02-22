@@ -1,6 +1,7 @@
 """Validate and filter jobs - Blue-Collar Bouncer."""
 
 from src.job_scout.blocked_domains import is_domain_blocked
+from src.job_scout.city_to_region import get_region
 from src.job_scout.models import ValidatedJob, ValidatedJobsList
 from src.job_scout.state import JobScoutState
 
@@ -67,7 +68,7 @@ async def validate_filter_node(state: JobScoutState) -> dict:
 
     prompt = f"""{VALIDATE_PROMPT}
 
-Pro každou pozici, kterou PONECHAT, vrať kompletní záznam včetně: position, company, description, salary, url, source_url.
+Pro každou pozici, kterou PONECHAT, vrať kompletní záznam včetně: position, company, city, region, contact, description, salary, url, source_url. Pole city, region a contact zkopíruj z extrahovaných dat; pokud tam nejsou, nech prázdné.
 
 Extrahované pozice (JSON):
 {jobs_text}
@@ -84,6 +85,9 @@ Extrahované pozice (JSON):
     except Exception:
         validated = []
 
+    user_input = state.get("user_input", {})
+    fallback_city = user_input.get("city", "")
+
     seen = set()
     unique: list[dict] = []
     for v in validated:
@@ -92,7 +96,14 @@ Extrahované pozice (JSON):
         key = (v.position.lower().strip(), v.company.lower().strip())
         if key not in seen:
             seen.add(key)
-            unique.append(v.model_dump())
+            row = v.model_dump()
+            # City z extrahovaných dat; pokud prázdné, fallback na město z uživatelského zadání
+            if not (row.get("city") or "").strip():
+                row["city"] = fallback_city
+            # Region: fallback z mapy měst, pokud LLM neextrahoval
+            if not (row.get("region") or "").strip() and (row.get("city") or "").strip():
+                row["region"] = get_region(row["city"])
+            unique.append(row)
 
     print(f"[validate_filter] raw_jobs: {len(raw_jobs)}, unique po validaci: {len(unique)}")
 

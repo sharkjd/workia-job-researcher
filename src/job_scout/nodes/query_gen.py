@@ -13,27 +13,31 @@ NEVYHLEDÁVEJ job boardy ani agregátory inzerátů.
 Vrať POUZE samotný vyhledávací dotaz, žádný další text."""
 
 
+EXA_FIXED_QUERY = "Najdi webové stránky firem v Praze a středních Čechách, které jsou výrobní závody, logistické areály, dopravní společnosti, sklady nebo distribuční centra a zaměstnávají CNC operátory. Vyluč pracovní portály a agregátory nabídek práce."
+
+
 async def exa_query_gen_node(state: JobScoutState) -> dict:
     """Generate Exa semantic search query from user input."""
-    from langchain_google_genai import ChatGoogleGenerativeAI
-    from langchain_core.messages import HumanMessage
+    # from langchain_google_genai import ChatGoogleGenerativeAI
+    # from langchain_core.messages import HumanMessage
 
-    user_input = state["user_input"]
-    position = user_input.get("position", "řidič")
-    city = user_input.get("city", "Praha")
+    # user_input = state["user_input"]
+    # position = user_input.get("position", "řidič")
+    # city = user_input.get("city", "Praha")
 
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        temperature=0.3,
-    )
+    # llm = ChatGoogleGenerativeAI(
+    #     model="gemini-2.5-flash",
+    #     temperature=0.3,
+    # )
 
-    prompt = QUERY_GEN_PROMPT.format(position=position, city=city)
-    response = await llm.ainvoke(
-        [HumanMessage(content=prompt)],
-        config={"run_name": "exa_query_gen"},
-    )
+    # prompt = QUERY_GEN_PROMPT.format(position=position, city=city)
+    # response = await llm.ainvoke(
+    #     [HumanMessage(content=prompt)],
+    #     config={"run_name": "exa_query_gen"},
+    # )
 
-    query = response.content.strip().strip('"').strip("'")
+    # query = response.content.strip().strip('"').strip("'")
+    query = EXA_FIXED_QUERY
 
     print("\n" + "=" * 50)
     print("PROMPT PRO EXA.AI")

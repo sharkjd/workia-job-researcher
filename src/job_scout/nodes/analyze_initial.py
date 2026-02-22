@@ -14,7 +14,7 @@ from src.job_scout.url_utils import is_url_excluded, normalize_url
 
 ANALYZE_PROMPT = """Analyzuj tuto webovou stránku a extrahuj:
 
-1. **direct_offers**: Seznam pracovních pozic přímo na této stránce (název, popis, plat pokud je, URL, firma).
+1. **direct_offers**: Seznam pracovních pozic přímo na této stránce. Pro každou pozici uveď: název, popis, plat (pokud je), URL, firma, město (city), region (kraj podle firmy – Praha, Středočeský kraj, Liberecký kraj, Kraj Vysočina atd.; z adresy, sídla nebo města firmy; oficiální názvy; pokud není zjistitelné, prázdný řetězec), contact (telefon a/nebo jméno kontaktní osoby – komu volat; např. „Jan Novák, tel. 123 456 789“; z textu inzerátu; pokud není uvedeno, prázdný řetězec).
 2. **navigation_links**: Absolutní URL odkazů na tlačítka typu "Aktuální volná místa", "See all positions", "Kariéra", "Všechny pozice" - odkazy které vedou na seznam všech nabízených pozic.
 
 Pokud je to homepage, hledej v menu nebo patičce odkaz na Kariéru.
@@ -64,10 +64,10 @@ async def analyze_initial_pages_node(state: JobScoutState) -> dict:
                     continue
 
                 md = getattr(result, "markdown", None)
-                if hasattr(md, "raw_markdown"):
-                    markdown = md.raw_markdown or ""
-                elif hasattr(md, "fit_markdown") and md.fit_markdown:
+                if hasattr(md, "fit_markdown") and md.fit_markdown:
                     markdown = md.fit_markdown
+                elif hasattr(md, "raw_markdown"):
+                    markdown = md.raw_markdown or ""
                 elif isinstance(md, str):
                     markdown = md
                 else:
@@ -76,7 +76,7 @@ async def analyze_initial_pages_node(state: JobScoutState) -> dict:
                     continue
 
                 analysis = await structured_llm.ainvoke(
-                    [HumanMessage(content=ANALYZE_PROMPT.format(markdown=markdown[:15000]))],
+                    [HumanMessage(content=ANALYZE_PROMPT.format(markdown=markdown[:8000]))],
                     config={"run_name": "analyze_initial_pages"},
                 )
 

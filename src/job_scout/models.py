@@ -11,6 +11,9 @@ class ExtractedJob(BaseModel):
     salary: str | None = Field(default=None, description="Salary information if available")
     url: str = Field(description="URL to the job posting")
     company: str = Field(default="", description="Company name")
+    city: str = Field(default="", description="City or location where the job is (e.g. Praha, Brno, Nepomuk)")
+    region: str = Field(default="", description="Region (kraj) according to company - e.g. Praha, Středočeský kraj, Liberecký kraj")
+    contact: str = Field(default="", description="Phone number and/or contact person name (who to call)")
 
 
 class PageAnalysisResult(BaseModel):
@@ -31,6 +34,9 @@ class ValidatedJob(BaseModel):
 
     position: str
     company: str
+    city: str = ""
+    region: str = ""
+    contact: str = ""
     description: str
     salary: str | None = None
     url: str

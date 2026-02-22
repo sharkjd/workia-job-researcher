@@ -23,8 +23,10 @@ def get_user_input() -> dict:
     print("Workia Job Researcher - Analýza odkazů")
     print("=" * 50)
 
-    position = input("Pozice (např. řidič, skladník): ").strip() or "řidič"
-    city = input("Město: ").strip() or "Praha"
+    # position = input("Pozice (např. řidič, skladník): ").strip() or "řidič"
+    # city = input("Město: ").strip() or "Praha"
+    position = "CNC operátor"  # fixní režim – bez dotazu na pozici
+    city = "ČR"  # fixní režim – bez dotazu na město
     companies_per_run = _parse_int("Počet firem na běh (Exa výsledky) [10]: ", 10)
     max_career_links = _parse_int("Max. odkazů na kariéru na firmu (Serper) [5]: ", 5)
     max_nav_links_per_domain = _parse_int("Max. odkazů na crawl na doménu [5]: ", 5)

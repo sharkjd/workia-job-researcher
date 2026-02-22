@@ -13,7 +13,7 @@ from src.job_scout.url_utils import is_url_excluded, normalize_url
 
 CRAWL_DEEP_PROMPT = """Extrahuj ze stránky se seznamem pracovních pozic všechny nabízené pozice.
 
-Pro každou pozici uveď: position (název), description (krátký popis), salary (pokud je uveden), url (odkaz na detail), company (název firmy).
+Pro každou pozici uveď: position (název), description (krátký popis), salary (pokud je uveden), url (odkaz na detail), company (název firmy), city (město/lokalita práce), region (kraj podle firmy – Praha, Středočeský kraj, Liberecký kraj, Kraj Vysočina atd.; z adresy, sídla nebo města firmy; oficiální názvy; pokud není zjistitelné, prázdný řetězec), contact (telefon a/nebo jméno kontaktní osoby – komu volat; např. „Jan Novák, tel. 123 456 789“; z textu inzerátu; pokud není uvedeno, prázdný řetězec).
 
 Obsah stránky (Markdown):
 ---
@@ -60,10 +60,10 @@ async def crawl_deep_links_node(state: JobScoutState) -> dict:
                     continue
 
                 md = getattr(result, "markdown", None)
-                if hasattr(md, "raw_markdown"):
-                    markdown = md.raw_markdown or ""
-                elif hasattr(md, "fit_markdown") and md.fit_markdown:
+                if hasattr(md, "fit_markdown") and md.fit_markdown:
                     markdown = md.fit_markdown
+                elif hasattr(md, "raw_markdown"):
+                    markdown = md.raw_markdown or ""
                 elif isinstance(md, str):
                     markdown = md
                 else:
@@ -72,7 +72,7 @@ async def crawl_deep_links_node(state: JobScoutState) -> dict:
                     continue
 
                 analysis = await structured_llm.ainvoke(
-                    [HumanMessage(content=CRAWL_DEEP_PROMPT.format(markdown=markdown[:15000]))],
+                    [HumanMessage(content=CRAWL_DEEP_PROMPT.format(markdown=markdown[:8000]))],
                     config={"run_name": "crawl_deep_links"},
                 )
 
