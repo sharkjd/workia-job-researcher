@@ -31,6 +31,8 @@ ZDROJ INZERÁTU:
 
 Deduplikuj podle kombinace Title + Company - každou unikátní pozici uveď jen jednou.
 
+Pro každou pozici, kterou PONECHAT, přiřaď category – krátkou hlavní kategorii pro filtrování (např. „CNC operátor“, „řidič“, „skladník“, „dělník“, „kurýr“, „uklízeč“, „gastronomie“, „řemeslník“). Kategorie přiřaď volně podle názvu a popisu pozice.
+
 Vrať POUZE pozice, které PONECHAT."""
 
 
@@ -68,7 +70,7 @@ async def validate_filter_node(state: JobScoutState) -> dict:
 
     prompt = f"""{VALIDATE_PROMPT}
 
-Pro každou pozici, kterou PONECHAT, vrať kompletní záznam včetně: position, company, city, region, contact, description, salary, url, source_url. Pole city, region a contact zkopíruj z extrahovaných dat; pokud tam nejsou, nech prázdné.
+Pro každou pozici, kterou PONECHAT, vrať kompletní záznam včetně: position, company, city, region, contact, description, salary, category, url, source_url. Pole city, region a contact zkopíruj z extrahovaných dat; pokud tam nejsou, nech prázdné. Pole category přiřaď podle výše uvedené instrukce.
 
 Extrahované pozice (JSON):
 {jobs_text}

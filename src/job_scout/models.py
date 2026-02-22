@@ -39,6 +39,10 @@ class ValidatedJob(BaseModel):
     contact: str = ""
     description: str
     salary: str | None = None
+    category: str = Field(
+        default="",
+        description="Hlavní kategorie pozice pro filtrování, např. CNC operátor, řidič, skladník",
+    )
     url: str
     source_url: str = Field(description="URL of the page where job was found")
 

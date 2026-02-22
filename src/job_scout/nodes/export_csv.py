@@ -6,7 +6,7 @@ from datetime import datetime
 from src.job_scout.state import JobScoutState
 
 CSV_PATH = "vysledky.csv"
-FIELDNAMES = ["position", "company", "city", "region", "contact", "description", "salary", "url", "source_url"]
+FIELDNAMES = ["position", "category", "company", "city", "region", "contact", "description", "salary", "url", "source_url"]
 
 
 def _write_csv(path: str, rows: list[dict]) -> None:
